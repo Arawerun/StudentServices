@@ -1,0 +1,74 @@
+﻿@page "/student" 
+
+@using Model.Shared
+@inject HttpClient _httpClient
+
+<h3>StudentPage</h3>
+
+
+
+<button class="btn btn-primary" @onclick="StudentsAccountList">REFRESH</button>
+
+@if (studentList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name. (C)</th>
+                <th>Last Name</th>
+                <th>Course</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var list in studentList)
+            {
+                <tr>
+                    <td>@list.iD</td>
+                    <td>@list.fname</td>
+                    <td>@list.lname</td>
+                    <td>@list.course</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+    [Inject]
+    public NavigationManager NavigationManager{get; set;}
+
+    Students[] studentList;
+
+    public async Task  StudentsAccountList()
+    {
+
+        try
+        {
+            HttpResponseMessage json = await _httpClient.GetAsync($"api/Students/StudentsList");
+            if (json.IsSuccessStatusCode)
+            {
+
+                string content = await json.Content.ReadAsStringAsync();
+                studentList = JsonConvert.DeserializeObject<Students[]>(content);
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            //
+        }
+        
+
+        await InvokeAsync(StateHasChanged);
+
+    }
+}
